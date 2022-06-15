@@ -16,35 +16,76 @@
         android:layout_height="match_parent"
         android:background="@android:color/background_light">
 
-        <ProgressBar
-            android:id="@+id/loading_spinner"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/tv_plans"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            app:isNetworkError="@{safeUnbox(viewModel.eventNetworkError)}"
+            android:layout_margin="@dimen/margin_medium"
+            android:text="@string/plans"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/ll_download"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:playlist="@{viewModel.playlist}" />
+            android:visibility="invisible"
+            app:layout_constraintTop_toBottomOf="@+id/tv_plans"
+            app:layout_constraintVertical_bias="0.01999998">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/realEstate_recycler_view"
+            <TextView
+                android:id="@+id/tv_downloading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_medium"
+                android:text="@string/downloading"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/tv_counter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_medium"
+                android:text="@string/downloading"
+                counter="@{viewModel.downloadCount}"
+                totalCount="@{viewModel.totalFileSize}"
+                android:textColor="@color/black" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_download"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_medium"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/rounded_bottom"
+            android:padding="@dimen/margin_small"
+            android:text="@string/download"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:listitem="@layout/realestate_recycler_item" />
+            app:layout_constraintTop_toBottomOf="@+id/ll_download"
+            app:layout_constraintVertical_bias="0.86" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/video_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginTop="@dimen/margin_medium"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/realEstate_recycler_view"
+            app:layout_constraintTop_toBottomOf="@+id/tv_plans"
             tools:listitem="@layout/video_recycler_item" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

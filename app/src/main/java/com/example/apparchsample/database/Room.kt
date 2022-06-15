@@ -10,14 +10,13 @@ interface FunMarsDao {
     fun getVideos(): LiveData<List<DatabaseVideo>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll( videos: List<DatabaseVideo>)
+    fun insertAll(videos: List<DatabaseVideo>)
 
 }
 
 
-
-@Database(entities = [DatabaseVideo::class], version = 1)
-abstract class FunMarsDatabase: RoomDatabase() {
+@Database(entities = [DatabaseVideo::class], version = 1, exportSchema = false)
+abstract class FunMarsDatabase : RoomDatabase() {
     abstract val funMarsDao: FunMarsDao
 }
 
@@ -26,9 +25,11 @@ private lateinit var INSTANCE: FunMarsDatabase
 fun getDatabase(context: Context): FunMarsDatabase {
     synchronized(FunMarsDatabase::class.java) {
         if (!::INSTANCE.isInitialized) {
-            INSTANCE = Room.databaseBuilder(context.applicationContext,
+            INSTANCE = Room.databaseBuilder(
+                context.applicationContext,
                 FunMarsDatabase::class.java,
-                "videos").build()
+                "videos"
+            ).fallbackToDestructiveMigration().build()
         }
     }
     return INSTANCE

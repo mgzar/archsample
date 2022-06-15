@@ -3,11 +3,20 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/drawable/circular_progress_bar.xml" value="0.103" />
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/drawable/circular_shape.xml" value="0.103" />
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/drawable/gradient.xml" value="0.103" />
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/drawable/ic_baseline_remove_red_eye_24.xml" value="0.103" />
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/drawable/rounded_bottom.xml" value="0.103" />
         <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/layout/activity_main.xml" value="0.1" />
-        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/layout/fragment_dashboard.xml" value="0.1453804347826087" />
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/layout/fragment_dashboard.xml" value="0.1" />
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/layout/fragment_login.xml" value="0.1" />
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/layout/loading_dialog.xml" value="0.1455122393472348" />
         <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/layout/realEstate_recycler_item.xml" value="0.1453804347826087" />
         <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/layout/realestate_recycler_item.xml" value="0.1453804347826087" />
         <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/layout/recycler_item.xml" value="0.1453804347826087" />
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/layout/video_recycler_item.xml" value="0.1" />
+        <entry key="..\:/Users/Zarni/AndroidStudioProjects/apparchsample/app/src/main/res/xml/file_provider.xml" value="0.13055303717135086" />
       </map>
     </option>
   </component>

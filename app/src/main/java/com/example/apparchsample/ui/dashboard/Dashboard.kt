@@ -1,23 +1,27 @@
 package com.example.apparchsample.ui.dashboard
 
-import android.app.ActivityManager
-import android.content.Context
-import android.content.Intent
+import android.Manifest
+import android.app.DownloadManager
+import android.content.*
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.apparchsample.R
 import com.example.apparchsample.databinding.FragmentDashboardBinding
-import com.example.apparchsample.services.ScreenTimeService
-import com.example.apparchsample.ui.dashboard.adapter.RealEstateAdapter
-import com.example.apparchsample.ui.dashboard.adapter.VideoAdapter
+import com.example.apparchsample.domain.PlansModel
+import com.example.apparchsample.ui.dashboard.adapter.PlansListAdapter
+import java.io.File
+
 
 class Dashboard : Fragment() {
 
@@ -28,20 +32,16 @@ class Dashboard : Fragment() {
             DashboardViewModel.Factory(activity.application)
         )[DashboardViewModel::class.java]
     }
+    private var viewModelAdapter: PlansListAdapter? = null
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var binding: FragmentDashboardBinding
 
-    private var viewModelAdapter: VideoAdapter? = null
-
-    private var realEstateAdapter: RealEstateAdapter? = null
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        observePlayList()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding: FragmentDashboardBinding = DataBindingUtil.inflate(
+        binding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_dashboard,
             container,
@@ -49,87 +49,137 @@ class Dashboard : Fragment() {
         )
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
-        viewModelAdapter = VideoAdapter {
-            Toast.makeText(context, it.title, Toast.LENGTH_LONG).show()
-        }
-        realEstateAdapter = RealEstateAdapter {
-            Toast.makeText(context, it.img_src, Toast.LENGTH_LONG).show()
-
+        sharedPreferences = context?.getSharedPreferences("Sunrise", Context.MODE_PRIVATE)!!
+        verifyStoragePermissions()
+        viewModelAdapter = PlansListAdapter {
+            showFilePath(it)
         }
         binding.videoRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = viewModelAdapter
         }
-        binding.realEstateRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            adapter = realEstateAdapter
+
+        observePlansList()
+
+        binding.btnDownload.setOnClickListener {
+            viewModel.wasDownloaded = true
+            getToken()?.let { viewModel.getProjects(it) }
+            Log.d("#Download", "start")
+            hideDownloadButton()
+            showDownloadStatus()
         }
 
-        viewModel.eventNetworkError.observe(viewLifecycleOwner) { isNetworkError ->
-            if (isNetworkError) onNetworkError()
-        }
-        startService()
+        requireActivity().registerReceiver(
+            onComplete,
+            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        )
+
         return binding.root
     }
 
-    private fun observePlayList() {
+    private fun verifyStoragePermissions() {
+        val permission = ActivityCompat.checkSelfPermission(
+            requireActivity(),
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                PERMISSIONS_STORAGE,
+                REQUEST_EXTERNAL_STORAGE
+            )
+        }
+    }
+
+    private fun observePlansList() {
         with(viewModel) {
-            playlist.observe(viewLifecycleOwner) { videos ->
+            plansList.observe(viewLifecycleOwner) { plans ->
+                if (plans.isNotEmpty()) {
+                    hideDownloadButton()
+                    if (wasDownloaded) {
+                        context?.let { it1 ->
+                            observeDownload()
+                            viewModel.downloadImageFile(it1, plans)
+                        }
+                    } else {
+                        viewModel._uiBindDataPlanList.value = plans
+                        observeUiBindDataPlansList()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeDownload() {
+        with(viewModel) {
+            isDownloadFinished.observe(viewLifecycleOwner) {
+                if (it) {
+                    _uiBindDataPlanList.value = plansList.value
+                    observeUiBindDataPlansList()
+                    hideDownloadStatus()
+                }
+            }
+        }
+    }
+
+    private fun observeUiBindDataPlansList() {
+        with(viewModel) {
+            uiBindDataPlansList.observe(viewLifecycleOwner) {
                 if (viewModelAdapter != null) {
-                    videos?.let {
+                    it?.let {
                         viewModelAdapter?.submitData(it)
                     }
                 }
             }
-            realEstateList.observe(viewLifecycleOwner) {
-                if (realEstateAdapter != null) {
-                    it?.let {
-                        realEstateAdapter?.submitData(it)
-                    }
+        }
+    }
+
+    private fun hideDownloadButton() {
+        binding.btnDownload.visibility = View.GONE
+    }
+
+    private fun hideDownloadStatus() {
+        binding.llDownload.visibility = View.INVISIBLE
+    }
+
+    private fun showDownloadStatus() {
+        binding.llDownload.visibility = View.VISIBLE
+    }
+
+    private fun getToken(): String? {
+        return sharedPreferences.getString("token", null)
+    }
+
+    private var onComplete: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(ctxt: Context, intent: Intent) {
+            with(viewModel) {
+                addDownloadCount()
+                if (downloadCount.value!! >= totalFileSize.value!!) {
+                    setDownloadFinished()
                 }
             }
         }
     }
 
-    private fun onNetworkError() {
-        if (!viewModel.isNetworkErrorShown.value!!) {
-            Toast.makeText(activity, "Network Error", Toast.LENGTH_LONG).show()
-            viewModel.onNetworkErrorShown()
-        }
+    private fun showFilePath(it: PlansModel) {
+        val storageDir = "/storage/emulated/0/"
+        val folderName = "/Sunrise/"
+        val name = it.fileOriginalName?.substringAfterLast("/") ?: ""
+        val file = File(storageDir + Environment.DIRECTORY_DOCUMENTS + folderName, name)
+        Toast.makeText(context, file.absolutePath.toString(), Toast.LENGTH_LONG).show()
     }
 
-    private fun startService() {
-        if (isMyServiceRunning(ScreenTimeService::class.java)) return
-        val startIntent = Intent(context, ScreenTimeService::class.java)
-        startIntent.action = START_COMMAND
-        activity?.startService(startIntent)
-        Log.d("startService", "start")
-    }
-
-    private fun stopService() {
-        if (!isMyServiceRunning(ScreenTimeService::class.java)) return
-        val stopIntent = Intent(context, ScreenTimeService::class.java)
-        stopIntent.action = STOP_COMMAND
-        activity?.startService(stopIntent)
-    }
-
-    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager = activity?.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopService()
+    override fun onResume() {
+        super.onResume()
+        activity?.title = getString(R.string.dashboard_title)
     }
 
     companion object {
-        const val START_COMMAND = "start"
-        const val STOP_COMMAND = "stop"
+        private const val REQUEST_EXTERNAL_STORAGE = 1
+        private val PERMISSIONS_STORAGE = arrayOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
     }
+
 }

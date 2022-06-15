@@ -3,12 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <variable
-            name="data"
-            type="com.example.apparchsample.network.dtos.RealEstate" />
-    </data>
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
@@ -32,7 +26,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginBottom="@dimen/cardview_default_elevation"
-                    android:text="@{data.type}"
                     android:textAlignment="viewStart"
                     android:textAllCaps="false"
                     android:textColor="@color/black"
@@ -48,7 +41,6 @@
                     android:layout_height="0dp"
                     android:layout_marginStart="@dimen/cardview_default_elevation"
                     android:scaleType="centerCrop"
-                    app:imageUrl="@{data.img_src}"
                     app:layout_constraintBottom_toTopOf="@+id/title"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

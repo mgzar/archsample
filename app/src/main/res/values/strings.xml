@@ -3,4 +3,12 @@
     </string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title">Welcome Q4B</string>
+    <string name="email">"Please enter email "</string>
+    <string name="password">Please enter password</string>
+    <string name="login">Login</string>
+    <string name="download">Download</string>
+    <string name="plans">Plans</string>
+    <string name="downloading">Downloading Plans</string>
+    <string name="dashboard_title">Highlights &amp; Guidelines</string>
 </resources>

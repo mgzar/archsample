@@ -5,35 +5,34 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.apparchsample.database.FunMarsDatabase
 import com.example.apparchsample.database.asDomainModel
-import com.example.apparchsample.domain.SampleVideo
+import com.example.apparchsample.domain.PlansModel
 import com.example.apparchsample.network.NetworkService
-import com.example.apparchsample.network.dtos.RealEstate
+import com.example.apparchsample.network.dtos.LoginResponse
 import com.example.apparchsample.network.dtos.asDatabaseModel
-import com.example.apparchsample.network.dtos.asDomainModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class FunMarsRepository(private val database: FunMarsDatabase) {
-    private val _realEstateList = MutableLiveData<List<RealEstate>>()
+    private val _loginResponse = MutableLiveData<LoginResponse>()
 
-    val videos: LiveData<List<SampleVideo>> = Transformations.map(database.funMarsDao.getVideos()) {
+    val videos: LiveData<List<PlansModel>> = Transformations.map(database.funMarsDao.getVideos()) {
         it.asDomainModel()
     }
 
-    val realEstate: LiveData<List<RealEstate>>
-        get() = _realEstateList
+    val loginResponse: LiveData<LoginResponse>
+        get() = _loginResponse
 
-    suspend fun refreshVideos() {
+    suspend fun getProjects(token: String) {
         withContext(Dispatchers.IO) {
-            val playlist = NetworkService.apiService.getPlaylist()
-            database.funMarsDao.insertAll(playlist.asDatabaseModel())
+            val plansList = NetworkService.apiService.getProjects(token)
+            database.funMarsDao.insertAll(plansList.asDatabaseModel())
         }
     }
 
-    suspend fun getRealEstateData() {
+    suspend fun setLogin(username: String, password: String) {
         withContext(Dispatchers.IO) {
-            val dataList = NetworkService.apiService.getRealEstate()
-            _realEstateList.postValue( dataList)
+            val responseBody = NetworkService.apiService.postLogin(username, password)
+            _loginResponse.postValue(responseBody)
         }
     }
 

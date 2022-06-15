@@ -8,15 +8,15 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.apparchsample.R
 import com.example.apparchsample.databinding.VideoRecyclerItemBinding
-import com.example.apparchsample.domain.SampleVideo
+import com.example.apparchsample.domain.PlansModel
 
-class VideoAdapter(var callBackData: (SampleVideo) -> Unit) :
+class PlansListAdapter(var callBackData: (PlansModel) -> Unit) :
     RecyclerView.Adapter<RecyclerViewHolder>() {
 
-    private var videos: List<SampleVideo> = emptyList()
+    private var videos: List<PlansModel> = emptyList()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun submitData(videoList: List<SampleVideo>) {
+    fun submitData(videoList: List<PlansModel>) {
         videos = videoList
         notifyDataSetChanged()
     }
@@ -43,8 +43,9 @@ class VideoAdapter(var callBackData: (SampleVideo) -> Unit) :
 
 class RecyclerViewHolder(val viewDataBinding: VideoRecyclerItemBinding) :
     RecyclerView.ViewHolder(viewDataBinding.root) {
-    fun bind(data: SampleVideo) {
+    fun bind(data: PlansModel) {
         viewDataBinding.video = data
+    //    viewDataBinding.videoThumbnail.setImageBitmap(filename)
     }
 
     companion object {
